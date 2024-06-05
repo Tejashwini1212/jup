@@ -1,0 +1,362 @@
+1. AND,OR,XOR on hello world.
+#include <stdio.h>
+#include<string.h>
+#include<stdlib.h>
+int main() {
+char str[]="Hello World";
+int len=strlen(str);
+char s1[12],s2[12],s3[12];
+printf("After and operation\n");
+for(int i=0;i<len;i++){
+printf("%c=%d\n",str[i],str[i]&127);
+}
+printf("After or operation\n");
+for(int i=0;i<len;i++){
+printf("%c=%d\n",str[i],str[i]|127);
+}
+printf("After xor operation\n");
+for(int i=0;i<len;i++){
+printf("%c=%d\n",str[i],str[i]^127);
+}
+}
+
+
+
+2a. Ceaser Cipher
+import java.util.Scanner;
+public class ceaser{
+public static String encrypt(String p,int key){
+String e1="";
+for(char ch:p.toCharArray()){
+if(Character.isLowerCase(ch)){
+char e2=(char)(((ch-'a'+key)%26)+'a');
+e1+=e2;
+}
+else if(Character.isUpperCase(ch)){
+char e2=(char)(((ch-'A'+key)%26)+'A');
+e1+=e2;
+}
+else{
+e1+=ch;
+}
+}
+return e1;
+}
+public static String decrypt(String p,int key){
+return encrypt(p,26-key);
+}
+public static void main(String args[]){
+Scanner sc=new Scanner(System.in);
+System.out.println("Enter plaintext:");
+String plaintext=sc.nextLine();
+System.out.println("Enter key:");
+int key=sc.nextInt();
+String c=encrypt(plaintext,key);
+String d=decrypt(c,key);
+System.out.println("Encrypted text is "+c);
+System.out.println("Decrypted text is "+d);
+}
+}
+
+
+2b. Playfair
+import java.util.*;
+public class playfair{
+char[][] matrix;
+// Constructor
+playfair(String key){
+matrix=generateMatrix(key);
+}
+// f1
+char[][] generateMatrix(String key){
+key=key.toUpperCase().replaceAll("[^A-Z]","").replace('J','I');
+StringBuilder sb=new StringBuilder();
+Set<Character> set=new HashSet<>();
+for(char c:key.toCharArray()){
+if(set.add(c)){
+sb.append(c);
+}
+}
+for(char c='A';c<='z';c++){
+if(c!='J' && set.add(c)){
+sb.append(c);
+}
+}
+char[][] matrix=new char[5][5];
+for(int i=0;i<25;i++){
+matrix[i/5][i%5]=sb.charAt(i);
+}
+return matrix;
+}
+// f2
+private String preprocessMessage(String msg){
+msg=msg.toUpperCase().replaceAll("[^A-Z]","").replace('J','I');
+StringBuilder sb=new StringBuilder(msg);
+for(int i=0;i<sb.length()-1;i+=2){
+if(sb.charAt(i)==sb.charAt(i+1)){
+sb.insert(i+1,'X');
+}
+}
+if(sb.length()%2!=0){
+sb.append('X');
+}
+return sb.toString();
+}
+// f3
+private int[] findPosition(char ch){
+for(int i=0;i<5;i++){
+for(int j=0;j<5;j++){
+if(matrix[i][j]==ch){
+return new int[]{i,j};
+}
+}
+}
+return null;
+}
+// f4
+public String encrypt(String plaintext){
+return processMessage(plaintext,true);
+}
+//f5
+public String decrypt(String ciphertext){
+return processMessage(ciphertext,false);
+}
+// f6
+private String processMessage(String msg,boolean encrypt){
+msg=preprocessMessage(msg);
+StringBuilder res=new StringBuilder();
+int shift=encrypt?1:-1;
+for(int i=0;i<msg.length();i+=2){
+char a=msg.charAt(i);
+char b=msg.charAt(i+1);
+int[] posA=findPosition(a);
+int[] posB=findPosition(b);
+if(posA[0]==posB[0]){
+res.append(matrix[posA[0]][(posA[1]+shift+5)%5]);
+res.append(matrix[posB[0]][(posB[1]+shift+5)%5]);
+}
+else if(posA[1]==posB[1]){
+res.append(matrix[(posA[0]+shift+5)%5][posA[1]]);
+res.append(matrix[(posB[0]+shift+5)%5][posB[1]]);
+}
+else{
+res.append(matrix[posA[0]][posB[1]]);
+res.append(matrix[posB[0]][posA[1]]);
+}
+}
+return res.toString();
+}
+public static void main(String[] args){
+// Scanner sc=new Scanner(System.in);
+// System.out.printf("Enter plaintext:");
+// String plaintext=sc.nextLine();
+// System.out.println("Enter key:");
+// String key=sc.nextLine();
+String key="MONARCHY";
+String plaintext="INSTRUMENTS";
+playfair cipher=new playfair(key);
+String ct=cipher.encrypt(plaintext);
+String dt=cipher.decrypt(ct);
+System.out.println("Ciphertext: " + ct);
+System.out.println("Decrypted Text: " + plaintext);
+}
+}
+
+
+
+3a. Vigenere
+#include <stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<ctype.h>
+void printtable(){
+printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
+for(int i=0;i<26;i++){
+printf("%c",'A'+i);
+for(int j=0;j<26;j++){
+printf("%c",'A'+(i+j)%26);
+}
+printf("\n");
+}
+}
+char pt[128],key[16];
+void encrypt(){
+printf("enter plaintext:");
+scanf("%s",pt);
+printf("enter key:");
+scanf("%s",key);
+for(int i=0,j=0;i<strlen(pt);i++,j++){
+if(j>=strlen(key)){
+j=0;
+}
+int shift=toupper(key[j])-'A';
+char c=((toupper(pt[i])-'A'+shift)%26)+'A'; 
+printf("%c",c);
+}
+}
+void decrypt(){
+printf("\nDecrypted text is %s\n",pt);
+}
+int main() {
+encrypt();
+decrypt();
+printtable();
+}
+
+
+
+
+3b. Railfence
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+char str[100];
+void encrypt(char *str,int rails){
+printf("enter message:");
+scanf(" %[^\n]", str); 
+printf("enter no of rails:");
+scanf("%d",&rails);
+int i,j=0,len,count=0,code[100][1000];
+len=strlen(str);
+for(int i=0;i<rails;i++){
+for(int j=0;j<len;j++){
+code[i][j]=0;
+}
+}
+while(j<len){
+if(count%2==0){
+for( i=0;i<rails;i++){
+if(j<len){
+code[i][j]=(int)str[j];
+}
+j++;
+}
+}
+else{
+for(i=rails-2;i>0;i--){
+if(j<len){
+code[i][j]=(int)str[j];
+}
+j++;
+}
+}
+count++;
+}
+printf("Railfence pattern\n");
+for(int i=0;i<rails;i++){
+for(int j=0;j<len;j++){
+if(code[i][j]!=0){
+printf("%c",code[i][j]);
+}
+else{
+printf(" ");
+}
+}
+printf("\n");
+}
+printf("Encrypted text:");
+for(int i=0;i<rails;i++){
+for(int j=0;j<len;j++){
+if(code[i][j]!=0){
+printf("%c",(char)code[i][j]);
+}
+}
+}
+printf("\n");
+}
+void decrypt(){
+printf("Decrypted text:%s",str);
+}
+int main(){
+int rails;
+encrypt(str,rails);
+decrypt();
+}
+
+
+
+
+4.Hill Cipher
+#include<stdio.h>
+#include<string.h>
+#include<ctype.h>
+int main(){ 
+unsigned int a[3][3]={{2,7,8},{8,4,13},{15,17,6}}; 
+unsigned int b[3][3]={{3,2,9},{7,6,8},{16,17,20}}; 
+int i,j,t=0; 
+unsigned int c[20],d[20]; 
+char msg[20]; 
+printf("\n Enter the plain text(in capitals):"); 
+scanf("%s",msg); 
+for(i=0;i<3;i++){ 
+c[i]=toupper(msg[i])-65; 
+printf("%d",c[i]); 
+} 
+for(i=0;i<3;i++){ 
+t=0; 
+for(j=0;j<3;j++){ 
+t+=(a[i][j]*c[j]); 
+} 
+d[i]=t%26; 
+} 
+printf("\n Encrypted Cipher text is:"); 
+for(i=0;i<3;i++){ 
+printf("%c",d[i]+65); 
+} 
+for(i=0;i<3;i++){ 
+t=0; 
+for(j=0;j<3;j++){ 
+t+=(b[i][j]*d[j]); 
+} 
+c[i]=t%26; 
+} 
+printf("\n Decrypted cipher text is:"); 
+for(i=0;i<3;i++){ 
+printf("%c",c[i]+65); 
+} 
+return 0; 
+} 
+
+
+
+
+
+5. DES
+#include<stdio.h>
+int IP[]={2,6,3,1,4,8,5,7};
+int inverse[]={4,1,3,5,7,2,8,6};
+int s0[4][4]={
+{1,0,3,2}, 
+{3,2,1,0}, 
+{0,2,1,3}, 
+{3,1,3,2} 
+};
+int s1[4][4]={ 
+{0,1,2,3}, 
+{2,0,1,3}, 
+{3,0,1,0}, 
+{2,1,0,3} 
+}; 
+int inital_perm(int pt){
+int res=0;
+for(int i=0;i<8;i++){
+res|=((pt>>(8-IP[i]))&1)<<(7-i);
+}
+return res;
+}
+int inverse_inital(int ct){
+int res=0;
+for(int i=0;i<8;i++){
+res|=((ct>>(8-inverse[i]))&1)<<(7-i);
+}
+return res;
+}
+int main(){
+int pt=0b10010111;
+printf("Plaintext is %x\n",pt);
+int ct=inital_perm(pt);
+printf("Cipher text is %x\n",ct);
+int decrypt=inverse_inital(ct);
+printf("Decrypted text is %x\n",decrypt);
+return 0;
+}
